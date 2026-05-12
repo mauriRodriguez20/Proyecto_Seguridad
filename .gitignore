@@ -1,0 +1,17 @@
+# Vagrant
+.vagrant/
+ 
+# Logs
+*.log
+ 
+# Archivos temporales del sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+ 
+# IMPORTANTE: Las claves WireGuard SÍ se versionan intencionalmente.
+# Esto es aceptable porque es un entorno de laboratorio académico.
+# En producción NUNCA se versiona una clave privada.
+# keys/*.key  <-- NO ignorar, necesario para que el equipo use las mismas claves
+ 
