@@ -153,7 +153,7 @@ Abrir una segunda terminal y entrar al server-vpn:
 
 ```bash
 vagrant ssh server-vpn
-sudo tcpdump -i enp0s8 -n port 51820
+sudo tcpdump -i enp0s8 -n port 51820 -w captura.pcap
 ```
 
 Desde el cliente (primera terminal) genera tráfico:
@@ -164,6 +164,12 @@ curl http://192.168.56.20
 
 **Resultado esperado:** En el server-vpn se verán paquetes UDP en el puerto 51820.
 El contenido es ilegible — está cifrado por WireGuard. Nadie puede interceptar los datos.
+
+Para terminar la captura se usa ctrl + c, en este momento podremos mover el archivo captura.pcap a la carpeta compartida
+```bash
+sudo mv captura.pcap /capturas/captura.pcap
+```
+Des de el host abrimos este archivo en Wireshark para poder analizar el trafico capturado
 
 ---
 
