@@ -169,7 +169,7 @@ Para terminar la captura se usa ctrl + c, en este momento podremos mover el arch
 ```bash
 sudo mv captura.pcap /capturas/captura.pcap
 ```
-Des de el host abrimos este archivo en Wireshark para poder analizar el trafico capturado
+Desde el host abrimos este archivo en Wireshark para poder analizar el trafico capturado
 
 ---
 
