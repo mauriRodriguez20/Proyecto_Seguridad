@@ -192,3 +192,93 @@ y el túnel funcione sin reconfiguración.
 
 > ⚠️ Esto es válido solo para entornos de laboratorio académico.
 > En producción, las claves privadas **nunca** se versionan en un repositorio.
+
+## Control de Acceso por Usuario/Grupo
+
+Se configuró un sistema de permisos en el `server-interno` que restringe el acceso a los recursos internos según el grupo al que pertenece el usuario.
+
+### Grupos y usuarios creados
+
+| Usuario | Grupo | Contraseña |
+| --- | --- | --- |
+| admin_vpn | vpn_admin + vpn_users | Admin1234! |
+| user_vpn | vpn_users | User1234! |
+| invitado_vpn | sin grupo | Guest1234! |
+
+### Zonas de acceso
+
+| Ruta | Acceso requerido | Descripción |
+| --- | --- | --- |
+| `/publico/` | Ninguno | Acceso libre |
+| `/compartido/` | vpn_users | Usuarios VPN |
+| `/admin/` | vpn_admin | Solo administradores |
+
+### Verificación de permisos en el sistema de archivos
+
+```bash
+ls -la /srv/datos/
+```
+
+Resultado esperado:
+drwxr-x---  root vpn_admin   admin/
+drwxrwx---  root vpn_users   compartido/
+drwxr-xr-x  root root        publico/
+
+### Pruebas de acceso desde el cliente
+
+```bash
+# Zona pública (sin contraseña)
+curl http://192.168.56.20/publico/
+
+# Zona compartida (usuario normal) → 200 OK
+curl -u user_vpn:User1234! http://192.168.56.20/compartido/
+
+# Zona admin (administrador) → 200 OK
+curl -u admin_vpn:Admin1234! http://192.168.56.20/admin/
+
+# Zona admin con usuario sin permisos → 401 Unauthorized
+curl -u user_vpn:User1234! http://192.168.56.20/admin/
+```
+
+---
+
+## Sistema de Logs VPN
+
+Se implementó un sistema de logs en el `server-vpn` que registra conexiones, desconexiones e intentos de acceso bloqueados.
+
+### Archivos de log
+
+| Archivo | Descripción |
+| --- | --- |
+| `/var/log/vpn/conexiones.log` | Conexiones y desconexiones de peers |
+| `/var/log/vpn/intentos_fallidos.log` | Accesos bloqueados por firewall |
+
+### Tipos de eventos registrados
+
+| Código | Significado |
+| --- | --- |
+| `CONN` | Peer conectado (handshake exitoso) |
+| `DISC` | Peer desconectado (sin actividad) |
+| `DATA` | Actividad y tráfico del peer |
+
+### Comandos de consulta
+
+```bash
+vpn_logs resumen      # estado general del sistema
+vpn_logs conexiones   # solo conexiones y desconexiones
+vpn_logs actividad    # tráfico por peer
+vpn_logs fallidos     # intentos bloqueados
+vpn_logs todo         # log completo
+```
+
+### Monitor automático
+
+El sistema corre un monitor cada 60 segundos mediante un systemd timer:
+
+```bash
+# Ver estado del timer
+systemctl status wg-monitor.timer
+
+# Ver logs en tiempo real
+tail -f /var/log/vpn/conexiones.log
+```
