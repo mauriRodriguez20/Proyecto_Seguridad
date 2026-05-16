@@ -28,20 +28,22 @@ Vagrant.configure("2") do |config|
   # -------------------------------------------------------
   config.vm.define "server-vpn" do |vpn|
     vpn.vm.hostname = "server-vpn"
-
+    
     # Red externa: simula internet (conecta con el cliente)
     vpn.vm.network "private_network", ip: "10.10.10.10",
-      virtualbox__intnet: "red-externa"
-
+    virtualbox__intnet: "red-externa"
+    
     # Red interna: conecta con server-interno
     vpn.vm.network "private_network", ip: "192.168.56.10",
-      virtualbox__intnet: "red-interna"
-
+    virtualbox__intnet: "red-interna"
+    
     vpn.vm.provider "virtualbox" do |vb|
       vb.name   = "server-vpn"
       vb.memory = "1024"
       vb.cpus   = 1
     end
+    
+    config.vm.synced_folder "./capturas", "/capturas", disabled: false, create: true
 
     vpn.vm.provision "shell", path: "scripts/server_vpn.sh"
   end
